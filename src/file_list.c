@@ -130,6 +130,9 @@ extern const file_hint_t file_hint_bdm;
 #if !defined(SINGLE_FORMAT) || defined(SINGLE_FORMAT_berkeley)
 extern const file_hint_t file_hint_berkeley;
 #endif
+#if !defined(SINGLE_FORMAT) || defined(SINGLE_FORMAT_berkeleydb)
+extern const file_hint_t file_hint_berkeleydb;
+#endif
 #if !defined(SINGLE_FORMAT) || defined(SINGLE_FORMAT_bfa)
 extern const file_hint_t file_hint_bfa;
 #endif
@@ -1180,6 +1183,9 @@ file_enable_t array_file_enable[]=
 #endif
 #if !defined(SINGLE_FORMAT) || defined(SINGLE_FORMAT_berkeley)
   { .enable=0, .file_hint=&file_hint_berkeley },
+#endif
+#if !defined(SINGLE_FORMAT) || defined(SINGLE_FORMAT_berkeleydb)
+  { .enable=0, .file_hint=&file_hint_berkeleydb },
 #endif
 #if !defined(SINGLE_FORMAT) || defined(SINGLE_FORMAT_bfa)
   { .enable=0, .file_hint=&file_hint_bfa  },
