@@ -1,25 +1,3 @@
-/*
-
-    File: file_bdb.c
-
-    Copyright (C) 2008 Christophe GRENIER <grenier@cgsecurity.org>
-  
-    This software is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-  
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-  
-    You should have received a copy of the GNU General Public License along
-    with this program; if not, write the Free Software Foundation, Inc., 51
-    Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
- */
-
 #if !defined(SINGLE_FORMAT) || defined(SINGLE_FORMAT_berkeleydb)
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -67,43 +45,11 @@ struct db_header {
 	uint32_t key_count;	/* 40-43: Cached key count. */
 	uint32_t record_count;	/* 44-47: Cached record count. */
 	uint32_t flags;	/* 48-51: Flags: unique to each AM. */
-				/* 52-71: Unique file ID. */
-	uint8_t  uid[20];
+	uint8_t  uid[20]; /* 52-71: Unique file ID. */
 } __attribute__ ((gcc_struct, __packed__));
-//} __attribute__ ((gcc_struct));
-
-struct old_db_header
-{
- char magic[16];
- uint16_t pagesize;
- uint8_t  ffwrite;
- uint8_t  ffread;
- uint8_t  reserved;
- uint8_t  max_emb_payload_frac;
- uint8_t  min_emb_payload_frac;
- uint8_t  leaf_payload_frac;
- uint32_t file_change_counter;
- uint32_t filesize_in_page;
- uint32_t first_freelist_page;
- uint32_t freelist_pages;
- uint32_t schema_cookie;
- uint32_t schema_format;
- uint32_t default_page_cache_size;
- uint32_t largest_root_btree;
- uint32_t text_encoding;
- uint32_t user_version;
- uint32_t inc_vacuum_mode;
- uint32_t app_id;
- char     reserved_for_expansion[20];
- uint32_t version_valid_for;
- uint32_t version;
-};// __attribute__ ((gcc_struct, __packed__));
 
 /*@
   @ requires buffer_size >= sizeof(struct db_header);
-  @ requires separation: \separated(&file_hint_sqlite, buffer+(..), file_recovery, file_recovery_new);
-  @ requires valid_header_check_param(buffer, buffer_size, safe_header_only, file_recovery, file_recovery_new);
-  @ ensures  valid_header_check_result(\result, file_recovery_new);
   @ assigns  *file_recovery_new;
   @*/
 static int header_check_berkeleydb(const unsigned char *buffer, const unsigned int buffer_size, const unsigned int safe_header_only, const file_recovery_t *file_recovery, file_recovery_t *file_recovery_new)
