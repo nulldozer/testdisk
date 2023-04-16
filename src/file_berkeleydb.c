@@ -36,7 +36,7 @@
 static void register_header_check_berkeleydb(file_stat_t *file_stat);
 
 const file_hint_t file_hint_berkeleydb= {
-  .extension="dat",
+  .extension="bdb",
   .description="berkeleydb database file",
   .max_filesize=PHOTOREC_MAX_FILE_SIZE,
   .recover=1,
@@ -49,8 +49,10 @@ struct __db_lsn { /* SHARED */
 	uint32_t	offset;		/* File offset. */
 };
 
+typedef struct __db_lsn DB_LSN;
+
 struct db_header {
-	uint32_t	  lsn;		/* 00-07: LSN. */
+	DB_LSN	  lsn;		/* 00-07: LSN. */
 	uint32_t pgno;		/* 08-11: Current page number. */
 	uint32_t magic;	/* 12-15: Magic number. */
 	uint32_t version;	/* 16-19: Version. */
@@ -95,7 +97,7 @@ struct old_db_header
  char     reserved_for_expansion[20];
  uint32_t version_valid_for;
  uint32_t version;
-} __attribute__ ((gcc_struct, __packed__));
+};// __attribute__ ((gcc_struct, __packed__));
 
 /*@
   @ requires buffer_size >= sizeof(struct db_header);
@@ -107,8 +109,8 @@ struct old_db_header
 static int header_check_berkeleydb(const unsigned char *buffer, const unsigned int buffer_size, const unsigned int safe_header_only, const file_recovery_t *file_recovery, file_recovery_t *file_recovery_new)
 {
   const struct db_header *hdr=(const struct db_header *)buffer;
-  unsigned int pagesize=be16(hdr->pagesize);
-  const unsigned int filesize_in_page=be32(hdr->last_pgno + 1);
+  unsigned int pagesize=le32(hdr->pagesize);
+  const unsigned int filesize_in_page=le32(hdr->last_pgno) + 1;
 
   reset_file_recovery(file_recovery_new);
 #ifdef DJGPP
@@ -116,7 +118,7 @@ static int header_check_berkeleydb(const unsigned char *buffer, const unsigned i
 #else
   file_recovery_new->extension=file_hint_berkeleydb.extension;
 #endif
-  file_recovery_new->min_filesize=sizeof(struct db_header);
+  file_recovery_new->min_filesize=(uint64_t)filesize_in_page * pagesize;
   if(filesize_in_page!=0)
   {
     file_recovery_new->calculated_file_size=(uint64_t)filesize_in_page * pagesize;
